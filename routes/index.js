@@ -7,19 +7,19 @@ router.get('/', (req, res) => {
 });
 
 router.post('/get-otp', (req, res) => {
-  const enteredMobileNumber = req.body.mobileNumber;
+  const enteredmobile_number = req.body.mobile_number;
 
    // Generate OTP
    const generatedOTP = '123456'; // For simplicity
 
   // Store mobile number and OTP in the database
   const sql = 'INSERT INTO users (mobile_number, otp) VALUES (?, ?)';
-  db.query(sql, [enteredMobileNumber, generatedOTP], (err, result) => {
+  db.query(sql, [enteredmobile_number, generatedOTP], (err, result) => {
   if (err) {
     console.error('Error storing mobile number and OTP:', err);
     res.render('login', { error: 'An error occurred. Please try again.' });
   } else {
-    req.session.mobileNumber = enteredMobileNumber;
+    req.session.mobile_number = enteredmobile_number;
     res.render('otp');
   }
 });
@@ -28,11 +28,11 @@ router.post('/get-otp', (req, res) => {
 
 router.post('/verify-otp', (req, res) => {
   const enteredOTP = req.body.otp;
-  const enteredMobileNumber = req.session.mobileNumber;
+  const enteredmobile_number = req.session.mobile_number;
 
   // Check if the provided OTP is valid
   const sql = 'SELECT * FROM users WHERE mobile_number = ? AND otp = ?';
-  db.query(sql, [enteredMobileNumber, enteredOTP], (err, result) => {
+  db.query(sql, [enteredmobile_number, enteredOTP], (err, result) => {
     if (err) {
       console.error('Error verifying OTP:', err);
       res.render('otp', { error: 'An error occurred. Please try again.' });
@@ -53,8 +53,8 @@ router.post('/verify-otp', (req, res) => {
 router.get('/dashboard', (req, res) => {
   // Check if the user is authenticated
   if (req.session.isAuthenticated) {
-    const mobileNumber= req.session.mobileNumber;
-    res.render('dashboard', { username: req.session.username, mobileNumber: mobileNumber });
+    const mobile_number= req.session.mobile_number;
+    res.render('dashboard', { username: req.session.username, mobile_number: mobile_number });
   } else {
     res.redirect('/');
   }
@@ -63,8 +63,8 @@ router.get('/dashboard', (req, res) => {
 router.get('/aboutus', (req, res) => {
   // Check if the user is authenticated
   if (req.session.isAuthenticated) {
-    const mobileNumber= req.session.mobileNumber;
-    res.render('aboutus', { username: req.session.username, mobileNumber: mobileNumber });
+    const mobile_number= req.session.mobile_number;
+    res.render('aboutus', { username: req.session.username, mobile_number: mobile_number });
   } else {
     res.redirect('/');
   }

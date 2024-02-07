@@ -7,20 +7,20 @@
 </head>
 <body>
   <h1>Login</h1>
-  <form id="loginForm" action="/get-otp" method="post" onsubmit="return validateMobileNumber()">
-    <label for="mobileNumber">Mobile Number:</label>
-    <input type="tel" id="mobileNumber" name="mobileNumber" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" required>
+  <form id="loginForm" action="/get-otp" method="post" onsubmit="return validatemobile_number()">
+    <label for="mobile_number">Mobile Number:</label>
+    <input type="tel" id="mobile_number" name="mobile_number" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" required>
     <br>
     <button type="submit">Get OTP</button>
   </form>
 
   <script>
-    function validateMobileNumber() {
-      var mobileNumberInput = document.getElementById('mobileNumber');
-      var mobileNumber = mobileNumberInput.value;
+    function validatemobile_number() {
+      var mobile_numberInput = document.getElementById('mobile_number');
+      var mobile_number = mobile_numberInput.value;
 
       // Check if the mobile number is 10 digits
-      if (mobileNumber.length === 10 && /^\d+$/.test(mobileNumber)) {
+      if (mobile_number.length === 10 && /^\d+$/.test(mobile_number)) {
         // Redirect to OTP page with user login session
         // You may want to set up a session or use some authentication mechanism here
         return true;
