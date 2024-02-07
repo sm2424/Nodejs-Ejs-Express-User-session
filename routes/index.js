@@ -9,29 +9,46 @@ router.get('/', (req, res) => {
 router.post('/get-otp', (req, res) => {
   const enteredMobileNumber = req.body.mobileNumber;
 
-  // Validate if the provided mobile number has exactly 10 digits and is '1234567890'
-  if (enteredMobileNumber === '1234567890') {
-    // Valid mobile number, generate and send OTP (skipping for simplicity)
+   // Generate OTP
+   const generatedOTP = '123456'; // For simplicity
+
+  // Store mobile number and OTP in the database
+  const sql = 'INSERT INTO users (mobile_number, otp) VALUES (?, ?)';
+  db.query(sql, [enteredMobileNumber, generatedOTP], (err, result) => {
+  if (err) {
+    console.error('Error storing mobile number and OTP:', err);
+    res.render('login', { error: 'An error occurred. Please try again.' });
+  } else {
     req.session.mobileNumber = enteredMobileNumber;
     res.render('otp');
-  } else {
-    res.render('login', { error: 'Invalid mobile number. Please enter the correct mobile number (1234567890).' });
   }
+});
+
 });
 
 router.post('/verify-otp', (req, res) => {
   const enteredOTP = req.body.otp;
+  const enteredMobileNumber = req.session.mobileNumber;
 
   // Check if the provided OTP is valid
-  if (enteredOTP === '123456') {
-    // Valid OTP, user is authenticated
-    req.session.isAuthenticated = true;
-    req.session.username = 'shiv'; // Set username to 'shiv'
-    res.redirect('/dashboard');
-  } else {
-    res.render('otp', { error: 'Invalid OTP. Please try again.' });
-  }
+  const sql = 'SELECT * FROM users WHERE mobile_number = ? AND otp = ?';
+  db.query(sql, [enteredMobileNumber, enteredOTP], (err, result) => {
+    if (err) {
+      console.error('Error verifying OTP:', err);
+      res.render('otp', { error: 'An error occurred. Please try again.' });
+    } else if (result.length > 0) {
+      // Valid OTP, user is authenticated
+      req.session.isAuthenticated = true;
+      req.session.username = 'shiv'; // Set username to 'shiv'
+      res.redirect('/dashboard');
+    } else {
+      res.render('otp', { error: 'Invalid OTP. Please try again.' });
+    }
+  });
 });
+
+
+  
 
 router.get('/dashboard', (req, res) => {
   // Check if the user is authenticated

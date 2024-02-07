@@ -2,9 +2,26 @@
 const express = require('express');
 const session = require('express-session');
 const routes = require('./routes/index');
+const mysql = require('mysql');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'your_username',
+  password: 'your_password',
+  database: 'your_database_name'
+});
+
+db.connect((err) => {
+  if (err) {
+    throw err;
+  }
+  console.log('MySQL Connected...');
+});
+
+global.db = db;
 
 app.set('view engine', 'ejs');
 app.use(express.json());
