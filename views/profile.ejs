@@ -1,0 +1,28 @@
+<!-- views/profile.ejs -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile</title>
+</head>
+<body>
+  <%- include('header', { pageTitle: 'Dashboard', isLoggedIn: true, mobile_number: mobile_number }) -%>
+  <h1>User Profile</h1>
+  <p>Mobile Number: <%= mobile_number %></p>
+  <form action="/save-profile" method="POST">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" value="<%= username %>" required><br><br>
+    
+    <label for="phone_number_id">Phone Number ID:</label>
+    <input type="text" id="phone_number_id" name="phone_number_id" value="<%= phone_number_id %>" required><br><br>
+    
+    <label for="pat">Permeant Access Token:</label>
+    <input type="text" id="pat" name="pat" value="<%= pat %>" required><br><br>
+    
+    <input type="submit" value="Save">
+  </form>
+  <form action="/viewprofile" method="GET">
+    <input type="submit" value="Back">
+  </form>
+</body>
+</html>
