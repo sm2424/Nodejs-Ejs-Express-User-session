@@ -6,8 +6,10 @@
   <title>User Profile</title>
 </head>
 <body>
-  <%- include('header', { pageTitle: 'Dashboard', isLoggedIn: true, mobile_number: mobile_number }) -%>
+  <%- include('header', { pageTitle: 'Dashboard', isLoggedIn: true, mobile_number: mobile_number, username: username }) -%>
   <h1>User Profile</h1>
+  
+  
   <p>Mobile Number: <%= mobile_number %></p>
   <form action="/save-profile" method="POST">
     <label for="name">Name:</label>
@@ -21,6 +23,9 @@
     
     <input type="submit" value="Save">
   </form>
+  <% if (typeof success !== 'undefined') { %>
+    <p style="color: green;"><%= success %></p>
+  <% } %>
   <form action="/viewprofile" method="GET">
     <input type="submit" value="Back">
   </form>

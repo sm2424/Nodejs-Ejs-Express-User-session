@@ -6,9 +6,10 @@
   <title>Dashboard</title>
 </head>
 <body>
-  <%- include('header', { pageTitle: 'Dashboard', isLoggedIn: true, mobile_number: mobile_number }) -%>
+  <%- include('header', { pageTitle: 'Dashboard', isLoggedIn: true, username: username }) -%>
 
   <h1>Welcome to the Dashboard!</h1>
+  <p>Username: <%= username %></p>
   <p>Mobile Number: <%= mobile_number %></p>
   <a href="/aboutus">About Us</a> | <a href="/logout">Logout</a>
 </body>

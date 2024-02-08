@@ -21,7 +21,7 @@
     .dropdown-container {
       position: relative;
     }
-    .mobile-number {
+    .user-info {
       display: flex;
       align-items: center;
       cursor: pointer;
@@ -32,10 +32,12 @@
       border-width: 0 2px 2px 0;
       display: inline-block;
       padding: 3px;
-      transform: rotate(45deg);
+      flex-direction: row-reverse;
+      
     }
     .dropdown-content {
       display: none;
+      
       position: absolute;
       background-color: #fff;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
@@ -47,19 +49,27 @@
   </style>
 </head>
 <body>
+  <a href="/dashboard">Home</a> | <a href="/aboutus">About Us</a>
   <div class="header-content">
-    <% if (isLoggedIn) { %>
-      <div class="dropdown-container">
-        <div class="mobile-number" onclick="toggleDropdown()">
-          <p id="mobile_number"><%= mobile_number %></p>
-          <div class="dropdown-arrow"></div>
-        </div>
+       
+    
+        <div class="user-info" onclick="toggleDropdown()">
+          
+          <% if (isLoggedIn) { %>
+            <div class="dropdown-container"> 
+              <% if (username) { %>
+              <p><%= username %></p>
+              <p><%= mobile_number %> </p><% } %>
+        </div><div class="dropdown-arrow">&#9660; </div>
+
+          
         <div class="dropdown-content">
           <a href="/dashboard">Home</a>
           <br>
           <a href="/viewprofile">Profile</a>
           
-          <a href="/settings">Settings</a>
+          
+          <br>
           <a href="/logout">Logout</a>
         </div>
       </div>
