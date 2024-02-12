@@ -76,10 +76,7 @@ router.post('/verify-otp', (req, res) => {
       res.render('otp', { error: 'Invalid OTP. Please try again.' });
     }
   });
-});
-
-
-  
+});  
 
 router.get('/dashboard', (req, res) => {
   // Check if the user is authenticated
