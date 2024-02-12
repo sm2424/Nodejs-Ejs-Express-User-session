@@ -2,17 +2,25 @@
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
+const uuid = require("uuid");
 
 
 // Add body-parser middleware
 router.use(bodyParser.urlencoded({ extended: true }));
 
 router.get('/', (req, res) => {
-  const mobile_number = req.session.mobile_number;
+    req.session.isAuth = true;
+    const sessionId = uuid.v4(); // Generate UUID for session ID
+    console.log("Session UUID:", sessionId); // Print session UUID to the terminal
+    
+    const mobile_number = req.session.mobile_number;
   res.render('login', { mobile_number });
 });
 
 router.post('/get-otp', (req, res) => {
+  req.session.isAuth = true;
+    const sessionId = uuid.v4(); // Generate UUID for session ID
+    console.log("Get OTP UUID:", sessionId); // Print session UUID to the terminal
   const enteredmobile_number = req.body.mobile_number;
 
   // Check if the mobile number exists in the database
@@ -32,9 +40,9 @@ router.post('/get-otp', (req, res) => {
         // Generate OTP if mobile number doesn't exist
         const generatedOTP = '123456'; // For simplicity
 
-        // Store mobile number and OTP in the database
-        const sqlInsert = 'INSERT INTO users (mobile_number, otp) VALUES (?, ?)';
-        db.query(sqlInsert, [enteredmobile_number, generatedOTP], (err, result) => {
+        // Store mobile number, OTP, and UUID in the database
+        const sqlInsert = 'INSERT INTO users (mobile_number, otp, uuid) VALUES (?, ?, ?)';
+        db.query(sqlInsert, [enteredmobile_number, generatedOTP, sessionId], (err, result) => {
           if (err) {
             console.error('Error storing mobile number and OTP:', err);
             res.render('login', { error: 'An error occurred. Please try again.' });
@@ -132,7 +140,7 @@ router.post('/save-profile', (req, res) => {
               // Update session with the new username
               req.session.username = newUsername;
               // Redirect to profile page or any other appropriate page
-              console.log('Profile updated successfullysucessful');
+              console.log('Profile updated successfully');
               res.redirect('/viewprofile');
               
             } else {
@@ -217,7 +225,7 @@ router.get('/aboutus', (req, res) => {
   }
 });
 
-router.get('/logout', (req, res) => {
+router.post('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error('Error destroying session:', err);
