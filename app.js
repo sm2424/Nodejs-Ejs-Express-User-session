@@ -9,18 +9,14 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 
-
-
-
-
-
 app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
   secret: 'your-secret-key',
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
+  
 }));
 
 app.use('/', routes);

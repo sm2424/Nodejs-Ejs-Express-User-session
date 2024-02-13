@@ -5,6 +5,15 @@ const bodyParser = require('body-parser');
 const uuid = require('uuid');
 const db = require("../config/db");
 
+// Add session middleware
+router.use((req, res, next) => {
+  if (!req.session) {
+    req.session = {};
+   }
+  next();
+  
+  
+});
 
 // Add body-parser middleware
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -12,63 +21,49 @@ router.use(bodyParser.urlencoded({ extended: true }));
 router.get('/', (req, res) => {
   // Check if the session is active
   if (req.session.isAuthenticated) {
-    // If the session is active, check if the session UUID exists in the database
-    const sessionId = req.sessionID;
-    const sqlCheckUUID = 'SELECT * FROM users WHERE uuid = ?';
-    db.query(sqlCheckUUID, [sessionId], (err, result) => {
-      if (err) {
-        console.error('Error checking session UUID:', err);
-        res.render('error', { error: 'An error occurred. Please try again.' });
-      } else {
-        if (result.length > 0) {
-          // If session UUID exists, redirect to dashboard page
-          req.session.isAuth = true;
-          const mobile_number = result[0].mobile_number;
-          req.session.mobile_number = mobile_number;
-          res.redirect('/dashboard');
-        } else {
-          // If session UUID doesn't exist, render login page
-          res.render('login', { mobile_number: req.session.mobile_number });
-        }
-      }
-    });
+    // If the session is active, redirect to dashboard
+    res.redirect('/dashboard');
   } else {
     // If the session is not active, render the login page
-    res.render('login', { mobile_number: req.session.mobile_number });
+    res.render('login', { mobile_number: req.session.mobile_number});
   }
 });
 
-    
 router.post('/get-otp', (req, res) => {
-  const enteredmobile_number = req.body.mobile_number;
+  const enteredMobileNumber = req.body.mobile_number;
 
   // Check if the mobile number exists in the database
   const sqlCheckMobile = 'SELECT * FROM users WHERE mobile_number = ?';
-  db.query(sqlCheckMobile, [enteredmobile_number], (err, result) => {
+  db.query(sqlCheckMobile, [enteredMobileNumber], (err, result) => {
     if (err) {
       console.error('Error checking mobile number:', err);
       res.render('login', { error: 'An error occurred. Please try again.' });
     } else {
       if (result.length > 0) {
+        // Mobile number exists, initiate session and redirect to verify OTP
         const username = result[0].username;
         req.session.isAuthenticated = true;
-        req.session.mobile_number = enteredmobile_number;
+        req.session.mobile_number = enteredMobileNumber;
         req.session.username = username;
-        res.redirect('/dashboard');
+        res.redirect('/verify-otp');
       } else {
-        // Generate OTP if mobile number doesn't exist
-        const generatedOTP = '123456'; // For simplicity
+       // Mobile number doesn't exist, treat as new user
+        // Generate a new OTP and proceed with registration
+        const generatedOTP = "123456"; // Fixed OTP for new users
+        const sessionId = uuid.v4(); // Generate UUID for session ID
+        console.log("Session UUID:", sessionId); // Print session UUID to the terminal
 
-        // Store mobile number, OTP, UUID in the database
-        const sqlInsert = 'INSERT INTO users (mobile_number, otp, uuid) VALUES (?, ?, ?)';
-        const sessionId = req.sessionID; // Access the session ID
-        db.query(sqlInsert, [enteredmobile_number, generatedOTP, sessionId], (err, result) => {
+        // Store the generated OTP in the database for verification later
+        const sqlInsertUser = 'INSERT INTO users (mobile_number, otp, uuid) VALUES (?, ?, ?)';
+        db.query(sqlInsertUser, [enteredMobileNumber, generatedOTP, sessionId], (err, result) => {
           if (err) {
-            console.error('Error storing mobile number and OTP:', err);
+            console.error('Error inserting new user:', err);
             res.render('login', { error: 'An error occurred. Please try again.' });
           } else {
-            req.session.mobile_number = enteredmobile_number;
-            res.render('otp');
+            // Initiate session and redirect to verify OTP
+            req.session.isAuthenticated = true;
+            req.session.mobile_number = enteredMobileNumber;
+            res.redirect('/verify-otp');
           }
         });
       }
@@ -76,42 +71,50 @@ router.post('/get-otp', (req, res) => {
   });
 });
 
+router.get('/verify-otp', (req, res) => {
+  // Render OTP verification page
+  res.render('otp');
+});
 
 router.post('/verify-otp', (req, res) => {
   const enteredOTP = req.body.otp;
-  const enteredmobile_number = req.session.mobile_number;
+  const enteredMobileNumber = req.session.mobile_number;
 
   // Check if the provided OTP is valid
   const sql = 'SELECT * FROM users WHERE mobile_number = ? AND otp = ?';
-  db.query(sql, [enteredmobile_number, enteredOTP], (err, result) => {
+  db.query(sql, [enteredMobileNumber, enteredOTP], (err, result) => {
     if (err) {
       console.error('Error verifying OTP:', err);
       res.render('otp', { error: 'An error occurred. Please try again.' });
     } else if (result.length > 0) {
       // Valid OTP, user is authenticated
       req.session.isAuthenticated = true;
-      
-      // const sessionId = uuid.v4(); // Generate UUID for session ID
-      // console.log("Session UUID:", sessionId); // Print session UUID to the terminal
-      
       res.redirect('/dashboard');
     } else {
       res.render('otp', { error: 'Invalid OTP. Please try again.' });
     }
   });
 });
-  
 
 router.get('/dashboard', (req, res) => {
   // Check if the user is authenticated
   if (req.session.isAuthenticated) {
     const mobile_number = req.session.mobile_number;
     const username = req.session.username; // Assuming username is stored in session
-
     res.render('dashboard', { mobile_number, username });
   } else {
     res.redirect('/');
   }
+});
+
+router.get('/logout', (req, res) => {
+  // Destroy the session
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error destroying session:', err);
+    }
+    res.redirect('/');
+  });
 });
 
 router.get('/profile', (req, res) => {
@@ -236,17 +239,14 @@ router.get('/aboutus', (req, res) => {
 });
 
 router.get('/logout', (req, res) => {
-        //Destory the session
-      req.session.destroy((err) => {
-        if (err) {
-          console.error('Error destroying session:', err);
-        } else {
-          res.redirect('/');
-        }
-      });
-    });
-  
-
-
+  //Destory the session
+req.session.destroy((err) => {
+  if (err) {
+    console.error('Error destroying session:', err);
+  } else {
+    res.redirect('/');
+  }
+});
+});
 
 module.exports = router;
