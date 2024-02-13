@@ -9,7 +9,8 @@
   <h1>Login</h1>
   <% if (mobile_number) { %>
     <p>Logged in with mobile number: <%= mobile_number %></p>
-  <% } %>
+  <% } %> 
+
   <form id="loginForm" action="/get-otp" method="post" onsubmit="return validatemobile_number()">
     <label for="mobile_number">Mobile Number:</label>
     <input type="tel" id="mobile_number" name="mobile_number" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" required>
