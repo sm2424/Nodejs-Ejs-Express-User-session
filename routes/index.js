@@ -5,15 +5,7 @@ const bodyParser = require('body-parser');
 const uuid = require('uuid');
 const db = require("../config/db");
 
-// Add session middleware
-router.use((req, res, next) => {
-  if (!req.session) {
-    req.session = {};
-   }
-  next();
-  
-  
-});
+
 
 // Add body-parser middleware
 router.use(bodyParser.urlencoded({ extended: true }));
