@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
     res.redirect('/dashboard');
   } else {
     // If the session is not active, render the login page
-    res.render('login', { mobile_number: req.session.mobile_number});
+    res.render('login', { mobile_number: req.session.mobile_number });
   }
 });
 
@@ -39,7 +39,7 @@ router.post('/get-otp', (req, res) => {
         req.session.username = username;
         res.redirect('/verify-otp');
       } else {
-       // Mobile number doesn't exist, treat as new user
+        // Mobile number doesn't exist, treat as new user
         // Generate a new OTP and proceed with registration
         const generatedOTP = "123456"; // Fixed OTP for new users
         const sessionId = uuid.v4(); // Generate UUID for session ID
@@ -153,7 +153,7 @@ router.post('/save-profile', (req, res) => {
               // Redirect to profile page or any other appropriate page
               console.log('Profile updated successfully');
               res.redirect('/viewprofile');
-              
+
             } else {
               res.render('error', { error: 'User not found.' });
             }
@@ -218,13 +218,102 @@ router.get('/edit-profile', (req, res) => {
   }
 });
 
+router.get('/sample_data', (req, res) => {
+  // Check if the user is authenticated
+  if (req.session.isAuthenticated) {
+    const mobile_number = req.session.mobile_number;
+    const username = req.session.username; // Assuming username is stored in session
+    const title = "Node JS Ajax CRUD Application"
+    res.render('sample_data', { mobile_number, username, title });
+  } else {
+    res.redirect('/');
+  }
+});
+
+router.post("/sample_data", (req, res) => {
+  // Check if the user is authenticated
+  if (req.session.isAuthenticated) {
+    const action = req.body.action;
+    if (action === 'fetch') {
+      const query = "SELECT * FROM sample_data ORDER BY id DESC";
+      db.query(query, (error, data) => {
+        if (error) {
+          console.error('Error fetching sample data:', error);
+          res.status(500).json({ error: 'An error occurred while fetching sample data.' });
+        } else {
+          res.json({ data });
+        }
+      });
+    } else if (action === 'Add') {
+      const { first_name, last_name, age, gender } = req.body;
+      const query = `
+        INSERT INTO sample_data 
+        (first_name, last_name, age, gender) 
+        VALUES (?, ?, ?, ?)
+      `;
+      db.query(query, [first_name, last_name, age, gender], (error, data) => {
+        if (error) {
+          console.error('Error adding sample data:', error);
+          res.status(500).json({ error: 'An error occurred while adding sample data.' });
+        } else {
+          res.json({ message: 'Data Added' });
+        }
+      });
+    } else if (action === 'fetch_single') {
+      const id = req.body.id;
+      const query = `SELECT * FROM sample_data WHERE id = ?`;
+      db.query(query, [id], (error, data) => {
+        if (error) {
+          console.error('Error fetching single record:', error);
+          res.status(500).json({ error: 'An error occurred while fetching single record.' });
+        } else {
+          res.json(data[0]);
+        }
+      });
+    } else if (action === 'Edit') {
+      const { id, first_name, last_name, age, gender } = req.body;
+      const query = `
+        UPDATE sample_data 
+        SET first_name = ?, 
+            last_name = ?, 
+            age = ?, 
+            gender = ? 
+            WHERE id = ?
+          `;
+      db.query(query, [first_name, last_name, age, gender, id], (error, data) => {
+        if (error) {
+          console.error('Error editing record:', error);
+          res.status(500).json({ error: 'An error occurred while editing record.' });
+        } else {
+          res.json({ message: 'Data Edited' });
+        }
+      });
+    } else if (action === 'delete') {
+      const id = req.body.id;
+      const query = `DELETE FROM sample_data WHERE id = ?`;
+      db.query(query, [id], (error, data) => {
+        if (error) {
+          console.error('Error deleting record:', error);
+          res.status(500).json({ error: 'An error occurred while deleting record.' });
+        } else {
+          res.json({ message: 'Data Deleted' });
+        }
+      });
+    } else {
+      res.status(400).json({ error: 'Invalid action' });
+    }
+  } else {
+    res.status(401).json({ error: 'Unauthorized' });
+  }
+});
+
 
 router.get('/aboutus', (req, res) => {
   // Check if the user is authenticated
   if (req.session.isAuthenticated) {
-    const mobile_number= req.session.mobile_number;
+    const mobile_number = req.session.mobile_number;
     const username = req.session.username; // Assuming username is stored in session
-    res.render('aboutus', {  mobile_number, username });
+    res.render('aboutus', { mobile_number, username });
   } else {
     res.redirect('/');
   }
@@ -232,13 +321,13 @@ router.get('/aboutus', (req, res) => {
 
 router.get('/logout', (req, res) => {
   //Destory the session
-req.session.destroy((err) => {
-  if (err) {
-    console.error('Error destroying session:', err);
-  } else {
-    res.redirect('/');
-  }
-});
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error destroying session:', err);
+    } else {
+      res.redirect('/');
+    }
+  });
 });
 
 module.exports = router;
