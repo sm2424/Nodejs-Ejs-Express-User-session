@@ -109,14 +109,14 @@ router.get('/logout', (req, res) => {
   });
 });
 
-router.get('/profile', (req, res) => {
+router.get('/profileread', (req, res) => {
   // Check if the user is authenticated
   if (req.session.isAuthenticated) {
     const mobile_number = req.session.mobile_number;
     const username = req.session.username; // Assuming username is stored in session
     const phone_number_id = req.session.phone_number_id; // Assuming phone_number_id is stored in session
     const fb_pat = req.session.fb_pat; // Assuming fb_pat is stored in session
-    res.render('profile', { pageTitle: 'User Profile', isLoggedIn: true, mobile_number, username, phone_number_id, fb_pat });
+    res.render('profileread', { pageTitle: 'User Profile', isLoggedIn: true, mobile_number, username, phone_number_id, fb_pat });
   } else {
     res.redirect('/');
   }
@@ -207,7 +207,7 @@ router.get('/edit-profile', (req, res) => {
       } else {
         if (result.length > 0) {
           const { username, phone_number_id, fb_pat } = result[0];
-          res.render('profile', { mobile_number, username, phone_number_id, fb_pat }); // Make sure to pass username here
+          res.render('profileread', { mobile_number, username, phone_number_id, fb_pat }); // Make sure to pass username here
         } else {
           res.render('error', { error: 'User not found.' });
         }
@@ -217,6 +217,73 @@ router.get('/edit-profile', (req, res) => {
     res.redirect('/');
   }
 });
+
+// router.get('/profile', (req, res) => {
+//   // Check if the user is authenticated
+//   if (req.session.isAuthenticated) {
+//     const mobile_number = req.session.mobile_number;
+//     const username = req.session.username; // Assuming username is stored in session
+
+//     // Fetch user details from the database
+//     const sql = 'SELECT * FROM users WHERE mobile_number = ?';
+//     db.query(sql, [mobile_number], (err, result) => {
+//       if (err) {
+//         console.error('Error fetching user details:', err);
+//         res.render('error', { error: 'An error occurred while fetching user details.' });
+//       } else {
+//         if (result.length > 0) {
+//           const { username, phone_number_id, fb_pat } = result[0];
+//           res.render('profile', { mobile_number, username, phone_number_id, fb_pat });
+//         } else {
+//           res.render('error', { error: 'User not found.' });
+//         }
+//       }
+//     });
+//   } else {
+//     res.redirect('/');
+//   }
+// });
+
+
+router.get('/profile', (req, res) => {
+  // Check if the user is authenticated
+  if (req.session.isAuthenticated) {
+    const mobile_number = req.session.mobile_number;
+    const username = req.session.username; // Assuming username is stored in session
+    res.render('profile', { mobile_number, username});
+  } else {
+    res.redirect('/');
+  }
+});
+
+router.post("/profile", (req, res) => {
+  // Check if the user is authenticated
+  if (req.session.isAuthenticated) {
+    const action = req.body.action;
+    if (action === 'fetch') {
+      const mobile_number = req.session.mobile_number; // Retrieve mobile number from session
+      const sql = 'SELECT * FROM users WHERE mobile_number = ?';
+      db.query(sql, [mobile_number], (err, data) => {
+        if (err) {
+          console.error('Error fetching sample data:', err);
+          res.status(500).json({ error: 'An error occurred while fetching sample data.' });
+        } else {
+          res.json({ data });
+        }
+      });
+    } else {
+      res.status(400).json({ error: 'Invalid action' });
+    }
+  } else {
+    res.status(401).json({ error: 'Unauthorized' });
+  }
+});
+
+
+
+
+
+
 
 router.get('/sample_data', (req, res) => {
   // Check if the user is authenticated

@@ -1,33 +1,142 @@
 <!-- views/profile.ejs -->
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Profile</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+    crossorigin="anonymous"></script>
+  <style>
+    body {
+      background-color: lightyellow;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+
+    .custome-title {
+      text-align: center;
+      font-weight: bold;
+    }
+
+    input {
+      border-radius: unset !important;
+    }
+
+    button {
+      border-radius: unset !important;
+      float: right;
+      margin: 0.4rem;
+    }
+
+    .card {
+      border-radius: unset !important;
+      margin-top: 3rem;
+      box-shadow: 0px 10px 10px 10px #a9a1a1;
+    }
+
+    .table td, .table th {
+        border: none !important;
+      }
+  </style>
 </head>
+
 <body>
-  <%- include('header', { pageTitle: 'Dashboard', isLoggedIn: true, mobile_number: mobile_number, username: username }) -%>
-  <h1>User Profile</h1>
-  
-  
-  <p>Mobile Number: <%= mobile_number %></p>
-  <form action="/save-profile" method="POST">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" value="<%= username %>" required><br><br>
-    
-    <label for="phone_number_id">Phone Number ID:</label>
-    <input type="text" id="phone_number_id" name="phone_number_id" value="<%= phone_number_id %>" required><br><br>
-    
-    <label for="fb_pat">Permeant Access Token:</label>
-    <input type="text" id="fb_pat" name="fb_pat" value="<%= fb_pat %>" required><br><br>
-    
-    <input type="submit" value="Save">
-  </form>
-  <% if (typeof success !== 'undefined') { %>
-    <p style="color: green;"><%= success %></p>
-  <% } %>
-  <form action="/viewprofile" method="GET">
-    <input type="submit" value="Back">
-  </form>
+  <%- include('header', { pageTitle: 'Dashboard' , isLoggedIn: true, mobile_number: mobile_number }) -%>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h4 class="" custome-title>User Profile </h4>
+            </div>
+            <div class="card-footer">
+              <div id="response">
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                </div>
+                
+                <div class="form-group">
+                    <!-- <label>Mobile Number: <%= mobile_number %></label><br>
+                    <label>Name: <span id="name"></span></label><br>
+                    <label>Phone Number ID: <span id="pni"></span></label><br>
+                    <label>Permanent Access Token: <span id="pat"></span></label>  -->
+                    <table class="table">
+                        <tbody>
+                          <tr>
+                            <td>Mobile Number:</td>
+                            <td><%= mobile_number %></td>
+                          </tr>
+                          <tr>
+                            <td>Name:</td>
+                            <td><span id="name"></span></td>
+                          </tr>
+                          <tr>
+                            <td>Phone Number ID:</td>
+                            <td><span id="pni"></span></td>
+                          </tr>
+                          <tr>
+                            <td>Permanent Access Token:</td>
+                            <td><span id="pat"></span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      
+                </div>
+
+                <div class="form-group">
+                  
+                  <button type="submit" class="btn btn-primary" id="editaction_button">Edit</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <h1></h1>
+        <p></p>
+        <p> </p>
+        <p> </p>
+        <p> </p>
+        <form action="/edit-profile" method="GET">
+          <input type="submit" value="Edit">
+        </form>
+        <script>
+            $(document).ready(function(){
+        
+                load_data();
+            
+                function load_data()
+                {
+                    $.ajax({
+                        url:"/profile",
+                        method:"POST",
+                        data:{action:'fetch'},
+                        dataType : "JSON",
+                        success:function(response)
+                        {
+                            var data = response.data; // Accessing data from the response
+        
+                            if(data.length > 0)
+                            {
+                                const { username, phone_number_id, fb_pat } = data[0]; // Accessing the first record
+                                $('#name').text(username); // Setting value for name input
+                                $('#pni').text(phone_number_id); // Setting value for phone number ID input
+                                $('#pat').text(fb_pat); // Setting value for permeant access token input
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText); // Log any errors
+                        }
+                    });
+                }
+            
+            });
+        </script>
+        
 </body>
+
 </html>
