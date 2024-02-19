@@ -11,7 +11,7 @@
     crossorigin="anonymous"></script>
   <style>
     body {
-      background-color: lightyellow;
+      background-color: lightgoldenrodyellow;
       background-repeat: no-repeat;
       background-size: cover;
     }
@@ -47,7 +47,8 @@
   <%- include('header', { pageTitle: 'Dashboard' , isLoggedIn: true, mobile_number: mobile_number }) -%>
     <div class="container">
       <div class="row">
-        <div class="col-md-3"></div>
+        <div class="col-md-3">
+        </div>
         <div class="col-md-6">
           <div class="card">
             <div class="card-header">
@@ -61,11 +62,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <!-- <label>Mobile Number: <%= mobile_number %></label><br>
-                    <label>Name: <span id="name"></span></label><br>
-                    <label>Phone Number ID: <span id="pni"></span></label><br>
-                    <label>Permanent Access Token: <span id="pat"></span></label>  -->
-                    <table class="table">
+                     <table class="table">
                         <tbody>
                           <tr>
                             <td>Mobile Number:</td>
@@ -90,26 +87,20 @@
 
                 <div class="form-group">
                   
-                  <button type="submit" class="btn btn-primary" id="editaction_button">Edit</button>
+                  <button type="submit" class="btn btn-primary" id="editButton">Edit</button>
+                  <button type="submit" class="btn btn-primary" id="saveButton" style="display: none;">Save</button>
                 </div>
               </div>
             </div>
+            <div id="updateMessage" class="alert alert-success" style="display: none;"></div>
+
           </div>
-        </div>
-        <h1></h1>
-        <p></p>
-        <p> </p>
-        <p> </p>
-        <p> </p>
-        <form action="/edit-profile" method="GET">
-          <input type="submit" value="Edit">
-        </form>
-        <script>
-            $(document).ready(function(){
+    </div>
+       
         
-                load_data();
-            
-                function load_data()
+    <script>
+            $(document).ready(function(){
+               function load_data()
                 {
                     $.ajax({
                         url:"/profile",
@@ -120,7 +111,7 @@
                         {
                             var data = response.data; // Accessing data from the response
         
-                            if(data.length > 0)
+                            if (data.length > 0) 
                             {
                                 const { username, phone_number_id, fb_pat } = data[0]; // Accessing the first record
                                 $('#name').text(username); // Setting value for name input
@@ -133,9 +124,63 @@
                         }
                     });
                 }
-            
-            });
-        </script>
+                load_data(); // Load data when the page loads
+
+                // Edit button click event
+                $('#editButton').click(function () {
+                    $('.table td span').each(function () {
+                    var value = $(this).text();
+                    var input = $('<input type="text" class="form-control">');
+                    input.val(value);
+                    $(this).html(input);
+                    });
+                    $('#editButton').hide();
+                    $('#saveButton').show();
+                });
+
+
+
+                // Save button click event
+                $('#saveButton').click(function () {
+                  var userData = {
+                      username: $('#name input').val(), // Assuming the input field for name has an ID of "name"
+                      phone_number_id: $('#pni input').val(), // Assuming the input field for phone number ID has an ID of "pni"
+                      fb_pat: $('#pat input').val() // Assuming the input field for Facebook permanent access token has an ID of "pat"
+                  };
+              
+                  // Send updated user data to the server for editing
+                  $.ajax({
+                      url: "/profile",
+                      method: "POST",
+                      data: { action: 'edit', userData: userData },
+                      dataType: "JSON",
+                      success: function (response) {
+                          $('#updateMessage').html('Data updated successfully').removeClass('alert-danger').addClass('alert-success').show();
+                          setTimeout(function () {
+                              $('#updateMessage').hide();                                                           
+                          }, 3000); // Hide the message after 3 seconds (3000 milliseconds)
+                      },
+                      error: function (xhr, status, error) {
+                          $('#updateMessage').html('Error updating data').removeClass('alert-success').addClass('alert-danger').show();
+                          console.error(xhr.responseText); // Log any errors
+                      }
+                  });
+                  // Reverting back to span elements after saving
+                  $('.table td').each(function () {
+                  var input = $(this).find('input');
+                  if (input.length > 0) {
+                      var value = input.val();
+                      $(this).find('span').text(value);
+                  }
+                });
+
+                  $('#editButton').show();
+                  $('#saveButton').hide();
+
+              });
+  });
+
+</script>
         
 </body>
 

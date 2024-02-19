@@ -159,7 +159,7 @@
                         },
                         success: function (data) {
                             $('#action_button').attr('disabled', false);
-                            $('#message').html('<div class="alert alert-success">' + data.message + '</div>'); //dsiplay sucess message
+                            $('#message').html('<div class="alert alert-success">' + data.message + '</div>'); //dsiplay success message
                             $('#action_modal').modal('hide'); //popup hide
 
                             load_data();
@@ -177,7 +177,7 @@
                         var id = $(this).data('id');
                         $('#dynamic_modal_title').text('Edit Data');                
                         $('#action').val('Edit');                
-                        $('#action_button').text('Edit');                
+                        $('#action_button').text('Save');                
                         $('#action_modal').modal('show');
                 
                         $.ajax({
